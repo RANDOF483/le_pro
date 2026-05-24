@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cart & Checkout – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.cart-layout{display:grid;grid-template-columns:1fr 380px;gap:32px;padding:120px 60px 80px;max-width:1300px;margin:0 auto}
+.order-summary{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:32px;position:sticky;top:90px;height:fit-content}
+.summary-row{display:flex;justify-content:space-between;padding:10px 0;font-size:.875rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+.summary-total{display:flex;justify-content:space-between;padding:16px 0;font-size:1.2rem;font-weight:700;color:var(--gold)}
+.coupon-row{display:flex;gap:8px;margin:16px 0}
+.coupon-input{flex:1;padding:12px;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:8px;color:var(--white);outline:none;font-size:.875rem}
+.coupon-input:focus{border-color:var(--gold)}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+.pay-method{padding:14px;border:1px solid var(--glass-border);border-radius:10px;text-align:center;cursor:pointer;transition:all .3s;font-size:.8rem}
+.pay-method:hover,.pay-method.active{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
+.pay-icon{font-size:1.5rem;display:block;margin-bottom:4px}
+.empty-cart{text-align:center;padding:80px 20px;color:rgba(255,255,255,0.5)}
+@media(max-width:900px){.cart-layout{grid-template-columns:1fr;padding:100px 20px 60px}}
+</style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="perfumes.html">Perfumes</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon" style="color:var(--gold)">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+  </div>
+</nav>
+
+<div class="cart-layout">
+  <div>
+    <h1 class="serif" style="margin-bottom:8px">Your <span class="gold">Cart</span></h1>
+    <p style="color:rgba(255,255,255,0.5);margin-bottom:32px" id="cartCountLabel"></p>
+    <div id="cartItems"></div>
+  </div>
+
+  <div class="order-summary">
+    <h3 style="margin-bottom:24px;font-size:1.1rem;letter-spacing:1px;text-transform:uppercase">Order Summary</h3>
+    <div class="summary-row"><span>Subtotal</span><span id="subtotal">0 FCFA</span></div>
+    <div class="summary-row"><span>Delivery</span><span style="color:#38A169">Free in Buea</span></div>
+    <div class="coupon-row">
+      <input class="coupon-input" id="couponInput" type="text" placeholder="Promo code">
+      <button class="btn btn-outline" style="padding:10px 16px;font-size:.8rem" onclick="applyCoupon()">Apply</button>
+    </div>
+    <div id="discountRow" style="display:none" class="summary-row"><span style="color:#38A169">Discount</span><span style="color:#38A169" id="discountVal"></span></div>
+    <div class="summary-total"><span>Total</span><span id="totalPrice">0 FCFA</span></div>
+
+    <div style="font-size:.8rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:12px">Payment Method</div>
+    <div class="payment-methods">
+      <div class="pay-method active" onclick="selectPay(this,'mtn')"><span class="pay-icon">📱</span>MTN MoMo</div>
+      <div class="pay-method" onclick="selectPay(this,'orange')"><span class="pay-icon">🟠</span>Orange Money</div>
+      <div class="pay-method" onclick="selectPay(this,'card')"><span class="pay-icon">💳</span>Card</div>
+      <div class="pay-method" onclick="selectPay(this,'cash')"><span class="pay-icon">💵</span>Cash on Delivery</div>
+    </div>
+
+    <div id="momoInfo" class="glass" style="padding:16px;border-radius:10px;margin-bottom:16px;font-size:.85rem;text-align:center">
+      <div style="color:rgba(255,255,255,0.6);margin-bottom:4px">Send payment to:</div>
+      <div style="color:var(--gold);font-size:1.2rem;font-weight:700">682 676 142</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:.75rem;margin-top:4px">MTN Mobile Money</div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="form-label">Your Name</label>
+      <input class="form-input" id="custName" type="text" placeholder="Full Name">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Phone Number</label>
+      <input class="form-input" id="custPhone" type="tel" placeholder="+237 6XX XXX XXX">
+    </div>
+    <div style="margin-bottom:20px">
+      <label class="form-label">Delivery Address</label>
+      <input class="form-input" id="custAddr" type="text" placeholder="Your address in Buea">
+    </div>
+
+    <button class="btn btn-wa" style="width:100%;padding:16px;font-size:1rem;margin-bottom:10px" onclick="orderWhatsApp()">💬 Order via WhatsApp</button>
+    <button class="btn btn-gold" style="width:100%;padding:16px;font-size:1rem" onclick="placeOrder()">✅ Confirm Order</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+<a class="wa-float" href="https://wa.me/237682676142" target="_blank">💬<div class="wa-tooltip">Need help?</div></a>
+
+<script src="js/store.js"></script>
+<script>
+let discount=0;
+let selectedPayment='mtn';
+const COUPONS={'LEPRO10':10,'VIP20':20,'WELCOME15':15};
+
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function selectPay(el,method){
+  document.querySelectorAll('.pay-method').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  selectedPayment=method;
+  document.getElementById('momoInfo').style.display=(method==='mtn'||method==='orange')?'block':'none';
+  if(method==='orange'){
+    document.getElementById('momoInfo').innerHTML=`<div style="color:rgba(255,255,255,0.6);margin-bottom:4px">Send payment to:</div><div style="color:var(--gold);font-size:1.2rem;font-weight:700">682 676 142</div><div style="color:rgba(255,255,255,0.5);font-size:.75rem;margin-top:4px">Orange Money</div>`;
+  } else if(method==='mtn'){
+    document.getElementById('momoInfo').innerHTML=`<div style="color:rgba(255,255,255,0.6);margin-bottom:4px">Send payment to:</div><div style="color:var(--gold);font-size:1.2rem;font-weight:700">682 676 142</div><div style="color:rgba(255,255,255,0.5);font-size:.75rem;margin-top:4px">MTN Mobile Money</div>`;
+  }
+}
+
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  const pct=COUPONS[code];
+  if(pct){
+    discount=pct;
+    showToast(`${pct}% discount applied!`,'🎉');
+    renderSummary();
+  } else {
+    showToast('Invalid promo code','❌');
+  }
+}
+
+function renderSummary(){
+  const total=Store.getCartTotal();
+  const disc=Math.round(total*discount/100);
+  const final=total-disc;
+  document.getElementById('subtotal').textContent=formatPrice(total);
+  document.getElementById('totalPrice').textContent=formatPrice(final);
+  if(discount>0){
+    document.getElementById('discountRow').style.display='flex';
+    document.getElementById('discountVal').textContent='-'+formatPrice(disc);
+  }
+}
+
+function renderCart(){
+  const cart=Store.getCart();
+  const count=Store.getCartCount();
+  document.getElementById('cartCountLabel').textContent=`${count} item${count!==1?'s':''} in your cart`;
+  const container=document.getElementById('cartItems');
+  if(!cart.length){
+    container.innerHTML=`<div class="empty-cart"><div style="font-size:4rem">🛒</div><h2 style="margin:20px 0">Your cart is empty</h2><p>Browse our collection and find something you love.</p><a href="shop.html" class="btn btn-gold" style="margin-top:24px">Start Shopping</a></div>`;
+    renderSummary();return;
+  }
+  container.innerHTML=cart.map(item=>`
+    <div class="cart-item">
+      <img class="cart-item-img" src="${item.image}" alt="${item.name}">
+      <div class="cart-item-info" style="flex:1">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-meta">${item.category} · Size: ${item.size}</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="updateQty('${item.id}','${item.size}',-1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="updateQty('${item.id}','${item.size}',1)">+</button>
+          <span style="color:var(--gold);font-weight:700;margin-left:12px">${formatPrice(item.price*item.qty)}</span>
+        </div>
+      </div>
+      <button onclick="Store.removeFromCart('${item.id}','${item.size}');renderCart()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1.3rem;padding:4px;transition:color .3s" onmouseover="this.style.color='#E53E3E'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">✕</button>
+    </div>`).join('');
+  renderSummary();
+}
+
+function updateQty(id,size,delta){
+  const cart=Store.getCart();
+  const item=cart.find(i=>i.id===id&&i.size===size);
+  if(item){Store.updateCartQty(id,size,item.qty+delta);renderCart();}
+}
+
+function orderWhatsApp(){
+  const cart=Store.getCart();
+  if(!cart.length){showToast('Cart is empty','⚠️');return;}
+  const name=document.getElementById('custName').value||'Customer';
+  const phone=document.getElementById('custPhone').value||'Not provided';
+  const addr=document.getElementById('custAddr').value||'Will confirm';
+  const items=cart.map(i=>`• ${i.name} (${i.size}) x${i.qty} = ${formatPrice(i.price*i.qty)}`).join('\n');
+  const total=Store.getCartTotal()-Math.round(Store.getCartTotal()*discount/100);
+  const msg=`🛍️ *Le Pro Collection – Order*\n\n👤 Name: ${name}\n📱 Phone: ${phone}\n📍 Address: ${addr}\n💳 Payment: ${selectedPayment.toUpperCase()}\n\n${items}\n\n💰 *Total: ${formatPrice(total)}*\n\nPlease confirm my order. Thank you!`;
+  Store.openWhatsApp(msg);
+}
+
+function placeOrder(){
+  const cart=Store.getCart();
+  if(!cart.length){showToast('Cart is empty','⚠️');return;}
+  const name=document.getElementById('custName').value;
+  const phone=document.getElementById('custPhone').value;
+  if(!name||!phone){showToast('Please enter your name and phone','⚠️');return;}
+  const order=Store.placeOrder({
+    customer:{name,phone,address:document.getElementById('custAddr').value},
+    items:cart,
+    total:Store.getCartTotal()-Math.round(Store.getCartTotal()*discount/100),
+    payment:selectedPayment
+  });
+  Store.saveCart([]);
+  showToast(`Order ${order.id} placed! We'll contact you soon.`,'🎉');
+  setTimeout(()=>renderCart(),500);
+  orderWhatsApp();
+}
+
+renderCart();
+</script>
+</body>
+</html>

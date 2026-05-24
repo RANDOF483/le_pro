@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wishlist – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar scrolled">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon" style="color:var(--gold)">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+  </div>
+</nav>
+
+<div style="padding:120px 40px 80px;max-width:1200px;margin:0 auto;min-height:80vh">
+  <div class="section-tag">Your Favorites</div>
+  <h1 class="section-title">My <span class="gold">Wishlist</span></h1>
+  
+  <div id="wishlistGrid" class="grid-4" style="margin-top:40px"></div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script>
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function removeWish(id){
+  const p=Store.getProductById(id);
+  Store.toggleWishlist(p);
+  showToast('Removed from wishlist');
+  renderWishlist();
+}
+
+function renderWishlist(){
+  const w=Store.getWishlist();
+  const container=document.getElementById('wishlistGrid');
+  if(!w.length){
+    container.style.display='block';
+    container.innerHTML=`<div style="text-align:center;padding:80px;color:rgba(255,255,255,0.5)"><div style="font-size:3rem">🤍</div><h3 style="margin:16px 0">Your wishlist is empty</h3><a href="shop.html" class="btn btn-gold">Browse Shop</a></div>`;
+    return;
+  }
+  container.style.display='grid';
+  container.innerHTML=w.map(p=>`
+    <div class="product-card" onclick="window.location='product.html?id=${p.id}'">
+      <div class="product-img">
+        <img src="${p.image}" alt="${p.name}">
+        <a class="product-wish active" onclick="event.stopPropagation();removeWish('${p.id}')">✕</a>
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price"><span class="price-main">${formatPrice(p.price)}</span></div>
+        <button class="btn btn-gold" style="width:100%;margin-top:12px;padding:8px" onclick="event.stopPropagation();Store.addToCart(Store.getProductById('${p.id}'),'${p.sizes[0]}',1);showToast('Added to cart!','🛒')">Add to Cart</button>
+      </div>
+    </div>`).join('');
+}
+renderWishlist();
+</script>
+</body>
+</html>

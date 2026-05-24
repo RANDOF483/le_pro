@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perfume Collection – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.perf-hero{padding:140px 40px 80px;background:linear-gradient(135deg,#0a0a0a,#1a0a00,#0d0a14);text-align:center;position:relative;overflow:hidden}
+.perf-hero::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(229,62,62,0.08),transparent);top:50%;left:50%;transform:translate(-50%,-50%)}
+.filters-bar{display:flex;gap:10px;flex-wrap:wrap;padding:24px 40px;background:var(--black2);border-bottom:1px solid var(--glass-border);position:sticky;top:72px;z-index:100}
+.perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:60px 40px;max-width:1400px;margin:0 auto}
+@media(max-width:1100px){.perf-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){.perf-grid{grid-template-columns:repeat(2,1fr);padding:40px 20px}}
+@media(max-width:480px){.perf-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="perfumes.html" style="color:var(--gold)">Perfumes</a></li>
+    <li><a href="stylist.html">AI Stylist</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+  </div>
+</nav>
+
+<div class="perf-hero">
+  <div class="section-tag">Signature Scents</div>
+  <h1 class="section-title">Luxury <span class="gold">Fragrances</span></h1>
+  <p style="color:rgba(255,255,255,0.6);max-width:480px;margin:0 auto 32px">Curated designer perfumes and luxury fragrances for the modern man. From fresh aqua to deep oud.</p>
+  <a href="stylist.html#fragrance" class="btn btn-gold">🌹 Find My Scent via AI</a>
+</div>
+
+<div class="filters-bar" id="filtersBar">
+  <button class="filter-btn active" onclick="filterPerf('')">All Fragrances</button>
+  <button class="filter-btn" onclick="filterPerf('Perfumes')">Perfumes</button>
+  <button class="filter-btn" onclick="filterPerf('Luxury Fragrances')">Luxury</button>
+  <button class="filter-btn" onclick="filterPerf('Body Sprays')">Body Sprays</button>
+  <button class="filter-btn" onclick="filterScent('Fresh')">🌊 Fresh</button>
+  <button class="filter-btn" onclick="filterScent('Oud')">🪵 Oud</button>
+  <button class="filter-btn" onclick="filterScent('Woody')">🌲 Woody</button>
+</div>
+
+<div class="perf-grid" id="perfGrid"></div>
+
+<a class="wa-float" href="https://wa.me/237682676142" target="_blank">💬<div class="wa-tooltip">Order on WhatsApp</div></a>
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60));
+let activeCat='',activeScent='';
+
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function filterPerf(cat){
+  activeCat=cat;activeScent='';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+function filterScent(scent){
+  activeScent=scent;activeCat='';
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function render(){
+  const PERF_CATS=['Perfumes','Luxury Fragrances','Body Sprays'];
+  let products=Store.getProducts().filter(p=>PERF_CATS.includes(p.category));
+  if(activeCat)products=products.filter(p=>p.category===activeCat);
+  if(activeScent)products=products.filter(p=>p.scentFamily===activeScent);
+  document.getElementById('perfGrid').innerHTML=products.length?products.map(p=>`
+    <div class="perfume-card" onclick="window.location='product.html?id=${p.id}'">
+      <div style="position:relative">
+        <img class="perfume-img" src="${p.image}" alt="${p.name}">
+        ${p.badge?`<span class="product-badge badge-luxury" style="position:absolute;top:8px;left:8px">${p.badge}</span>`:''}
+      </div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:8px">${p.name}</h3>
+      <p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-bottom:12px">${p.description||''}</p>
+      <div class="scent-tags">
+        ${p.scentFamily?`<span class="scent-tag">${p.scentFamily}</span>`:''}
+        ${p.occasion?`<span class="scent-tag">${p.occasion}</span>`:''}
+        ${p.season?`<span class="scent-tag">${p.season}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0">
+        <div>
+          <div class="price-main">${formatPrice(p.price)}</div>
+          ${p.oldPrice?`<div class="price-old">${formatPrice(p.oldPrice)}</div>`:''}
+        </div>
+        <div style="font-size:.75rem;color:rgba(255,255,255,0.4)">${p.stock} left</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-gold" style="flex:1;padding:10px;font-size:.8rem" onclick="event.stopPropagation();Store.addToCart(Store.getProductById('${p.id}'),'50ml',1);showToast('Added to cart!','🛒')">Add to Cart</button>
+        <button class="btn btn-wa" style="padding:10px 14px" onclick="event.stopPropagation();Store.orderOnWhatsApp(Store.getProductById('${p.id}'),'50ml')">💬</button>
+      </div>
+    </div>`).join(''):`<div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(255,255,255,0.4)"><div style="font-size:3rem">🌹</div><h3 style="margin:16px 0">No fragrances found</h3></div>`;
+}
+render();
+</script>
+</body>
+</html>

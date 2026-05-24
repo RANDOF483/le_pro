@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Pro Collection – Luxury Men's Fashion & Perfumes | Buea, Cameroon</title>
+<meta name="description" content="Premium men's fashion and luxury fragrances. Streetwear, suits, sneakers, watches and designer perfumes. Located at Malingo Opposite Guinness, Buea, Cameroon.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+.hero{background:linear-gradient(135deg,#0a0a0a 0%,#1a1000 40%,#0d0d0d 100%);position:relative}
+.hero-video-bg{position:absolute;inset:0;overflow:hidden}
+.hero-video-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,10,0.9) 50%,rgba(10,10,10,0.3))}
+.hero-img{width:100%;height:100%;object-fit:cover;opacity:.5}
+.marquee-strip{background:var(--gold);padding:10px 0;overflow:hidden;white-space:nowrap}
+.marquee-inner{display:inline-flex;animation:marquee 20s linear infinite;gap:0}
+.marquee-item{padding:0 32px;font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--black)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.look-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.look-item{position:relative;overflow:hidden;cursor:pointer}
+.look-item img{width:100%;height:400px;object-fit:cover;transition:transform .5s}
+.look-item:hover img{transform:scale(1.05)}
+.look-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.8),transparent);display:flex;flex-direction:column;justify-content:flex-end;padding:24px;opacity:0;transition:opacity .4s}
+.look-item:hover .look-overlay{opacity:1}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mood-card{border:1px solid var(--glass-border);border-radius:var(--radius);padding:32px 24px;text-align:center;cursor:pointer;transition:all .4s;background:var(--glass)}
+.mood-card:hover{border-color:var(--gold);background:var(--gold-dim);transform:translateY(-4px)}
+.mood-icon{font-size:2.5rem;margin-bottom:12px}
+.map-info{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="perfumes.html">Perfumes</a></li>
+    <li><a href="stylist.html">AI Stylist</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+    <a href="admin.html" class="nav-icon" title="Admin">⚙️</a>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <span class="close-menu" onclick="toggleMenu()">✕</span>
+  <a href="index.html" onclick="toggleMenu()">Home</a>
+  <a href="shop.html" onclick="toggleMenu()">Shop</a>
+  <a href="perfumes.html" onclick="toggleMenu()">Perfumes</a>
+  <a href="stylist.html" onclick="toggleMenu()">AI Stylist</a>
+  <a href="about.html" onclick="toggleMenu()">About</a>
+  <a href="contact.html" onclick="toggleMenu()">Contact</a>
+  <a href="cart.html" onclick="toggleMenu()">🛒 Cart</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-video-bg">
+    <img class="hero-img" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600" alt="Luxury Fashion">
+  </div>
+  <div class="hero-content" style="padding-top:120px">
+    <div class="hero-tag fade-up">✦ New Collection 2025</div>
+    <h1 class="fade-up delay-1">Dress Like<br><span class="gold-gradient">Royalty.</span><br>Smell Like<br>Legend.</h1>
+    <p class="fade-up delay-2">Premium men's fashion & luxury fragrances. Curated for the modern African gentleman.</p>
+    <div class="hero-btns fade-up delay-3">
+      <a href="shop.html" class="btn btn-gold">Shop Collection</a>
+      <a href="perfumes.html" class="btn btn-outline">Explore Perfumes</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><span>SCROLL</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner" id="marqueeInner"></div>
+</div>
+
+<!-- FLASH SALE -->
+<section class="section flash-section" style="padding:60px 40px;text-align:center">
+  <div class="section-tag">⚡ Limited Time Only</div>
+  <h2 class="section-title" style="margin-bottom:8px">Flash <span class="gold">Sale</span></h2>
+  <p style="color:rgba(255,255,255,0.6);margin-bottom:0">Up to 40% off selected items. Ends soon!</p>
+  <div class="countdown">
+    <div class="count-box"><div class="count-num" id="cHours">00</div><div class="count-label">Hours</div></div>
+    <div class="colon">:</div>
+    <div class="count-box"><div class="count-num" id="cMins">00</div><div class="count-label">Mins</div></div>
+    <div class="colon">:</div>
+    <div class="count-box"><div class="count-num" id="cSecs">00</div><div class="count-label">Secs</div></div>
+  </div>
+  <a href="shop.html" class="btn btn-gold">Grab The Deal</a>
+</section>
+
+<!-- NEW ARRIVALS -->
+<section class="section" style="background:var(--black2)">
+  <div class="section-header">
+    <div class="section-tag">Just Dropped</div>
+    <h2 class="section-title">New <span class="gold">Arrivals</span></h2>
+    <p class="section-sub">Fresh styles added weekly. Be the first to own them.</p>
+  </div>
+  <div class="grid-4" id="newArrivalsGrid"></div>
+  <div style="text-align:center;margin-top:40px">
+    <a href="shop.html" class="btn btn-outline">View All Products</a>
+  </div>
+</section>
+
+<!-- PERFUME SHOWCASE -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-tag">Signature Scents</div>
+    <h2 class="section-title">Luxury <span class="gold">Fragrances</span></h2>
+    <p class="section-sub">From oud royale to fresh aqua. Find your signature scent.</p>
+  </div>
+  <div class="grid-3" id="perfumeShowcase"></div>
+  <div style="text-align:center;margin-top:40px">
+    <a href="perfumes.html" class="btn btn-outline">Explore All Fragrances</a>
+  </div>
+</section>
+
+<!-- COMPLETE THE LOOK -->
+<section class="section" style="background:var(--black2);padding:80px 0">
+  <div class="section-header" style="padding:0 40px">
+    <div class="section-tag">Style Inspiration</div>
+    <h2 class="section-title">Complete The <span class="gold">Look</span></h2>
+  </div>
+  <div class="look-grid">
+    <div class="look-item">
+      <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800" alt="Luxury Look">
+      <div class="look-overlay">
+        <h3>The Executive</h3>
+        <p style="font-size:.85rem;color:rgba(255,255,255,0.7);margin:8px 0">Midnight Suit + Gold Watch + Noir Absolu</p>
+        <a href="stylist.html" class="btn btn-gold" style="margin-top:12px;width:fit-content">Shop This Look</a>
+      </div>
+    </div>
+    <div class="look-item">
+      <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800" alt="Street Look">
+      <div class="look-overlay">
+        <h3>Street Legend</h3>
+        <p style="font-size:.85rem;color:rgba(255,255,255,0.7);margin:8px 0">Hoodie + Cargo + Sneakers + Fresh Spray</p>
+        <a href="stylist.html" class="btn btn-gold" style="margin-top:12px;width:fit-content">Shop This Look</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRENDING -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-tag">🔥 Hot Right Now</div>
+    <h2 class="section-title">Trending <span class="gold">Picks</span></h2>
+  </div>
+  <div class="grid-4" id="trendingGrid"></div>
+</section>
+
+<!-- MOOD SHOPPING -->
+<section class="section" style="background:var(--black2)">
+  <div class="section-header">
+    <div class="section-tag">Shop By Vibe</div>
+    <h2 class="section-title">What's Your <span class="gold">Mood?</span></h2>
+    <p class="section-sub">Filter your style by the occasion and energy you bring.</p>
+  </div>
+  <div class="mood-grid">
+    <div class="mood-card" onclick="shopMood('Streetwear')"><div class="mood-icon">🔥</div><h3>Streetwear</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Bold. Raw. Authentic.</p></div>
+    <div class="mood-card" onclick="shopMood('Luxury')"><div class="mood-icon">👑</div><h3>Luxury</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Premium. Elegant. Exclusive.</p></div>
+    <div class="mood-card" onclick="shopMood('Business')"><div class="mood-icon">💼</div><h3>Business</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Sharp. Confident. Powerful.</p></div>
+    <div class="mood-card" onclick="shopMood('Smart Casual')"><div class="mood-icon">✨</div><h3>Smart Casual</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Clean. Refined. Versatile.</p></div>
+    <div class="mood-card" onclick="shopMood('Streetwear')"><div class="mood-icon">🎉</div><h3>Party</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Vibrant. Eye-catching. Fun.</p></div>
+    <div class="mood-card" onclick="shopMood('Streetwear')"><div class="mood-icon">🌍</div><h3>African Urban</h3><p style="font-size:.8rem;color:rgba(255,255,255,0.5);margin-top:8px">Culture. Heritage. Swagger.</p></div>
+  </div>
+</section>
+
+<!-- AI STYLIST CTA -->
+<section class="section" style="text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a0e00,#0a0a0a)">
+  <div class="section-tag">✦ Powered by AI</div>
+  <h2 class="section-title">Your Personal <span class="gold">Fashion AI</span></h2>
+  <p class="section-sub" style="margin-bottom:40px">Get outfit + perfume recommendations based on your budget, occasion & style. Completely free.</p>
+  <a href="stylist.html" class="btn btn-gold" style="font-size:1rem;padding:16px 40px">Try AI Stylist Free →</a>
+</section>
+
+<!-- REVIEWS -->
+<section class="section" style="background:var(--black2)">
+  <div class="section-header">
+    <div class="section-tag">Client Love</div>
+    <h2 class="section-title">What They <span class="gold">Say</span></h2>
+  </div>
+  <div class="grid-3" id="reviewsGrid"></div>
+</section>
+
+<!-- GALLERY -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-tag">@leprocollection</div>
+    <h2 class="section-title">Style <span class="gold">Gallery</span></h2>
+  </div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+  <div style="text-align:center;margin-top:32px">
+    <a href="https://wa.me/237682676142" class="btn btn-wa" target="_blank">📲 Follow on WhatsApp</a>
+  </div>
+</section>
+
+<!-- STORE MAP -->
+<section class="section" style="background:var(--black2)">
+  <div class="section-header">
+    <div class="section-tag">📍 Find Us</div>
+    <h2 class="section-title">Our <span class="gold">Store</span></h2>
+  </div>
+  <div style="max-width:900px;margin:0 auto">
+    <div class="map-info">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+        <div style="flex:1">
+          <h3 style="color:var(--gold);margin-bottom:8px">Le Pro Collection</h3>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem">📍 Malingo Opposite Guinness, Buea, Cameroon</p>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem;margin-top:4px">📱 WhatsApp: +237 682 676 142</p>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem;margin-top:4px">🕒 Mon–Sat: 8:00am – 8:00pm</p>
+        </div>
+        <a href="https://wa.me/237682676142?text=Hello%2C%20I%20want%20to%20visit%20your%20store" class="btn btn-wa" target="_blank">Get Directions via WhatsApp</a>
+      </div>
+    </div>
+    <div id="storeMap"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Le <span class="gold">Pro</span></div>
+      <p class="footer-desc">Premium men's fashion & luxury fragrances. Malingo Opposite Guinness, Buea, Cameroon.</p>
+      <div class="footer-socials">
+        <a href="https://wa.me/237682676142" class="social-btn" target="_blank">📱</a>
+        <a href="#" class="social-btn">📸</a>
+        <a href="#" class="social-btn">🎵</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-title">Shop</div>
+      <ul class="footer-links">
+        <li><a href="shop.html">All Products</a></li>
+        <li><a href="shop.html?cat=Suits">Suits</a></li>
+        <li><a href="shop.html?cat=Sneakers">Sneakers</a></li>
+        <li><a href="perfumes.html">Perfumes</a></li>
+        <li><a href="shop.html?cat=Watches">Watches</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-title">Info</div>
+      <ul class="footer-links">
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="stylist.html">AI Stylist</a></li>
+        <li><a href="cart.html">Cart</a></li>
+        <li><a href="wishlist.html">Wishlist</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-title">Payment</div>
+      <ul class="footer-links">
+        <li><a href="#">MTN Mobile Money</a></li>
+        <li><a href="#">Orange Money</a></li>
+        <li><a href="#">Cash on Delivery</a></li>
+      </ul>
+      <div style="margin-top:20px;font-size:.8rem;color:rgba(255,255,255,0.4)">MoMo: 682 676 142</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Le Pro Collection. All rights reserved.</span>
+    <span>Buea, Cameroon 🇨🇲</span>
+  </div>
+</footer>
+
+<!-- WhatsApp Float -->
+<a class="wa-float" href="https://wa.me/237682676142?text=Hello%20Le%20Pro%20Collection%21%20I%27m%20interested%20in%20your%20products." target="_blank">
+  <span>💬</span>
+  <div class="wa-tooltip">Chat on WhatsApp</div>
+</a>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Navbar scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);
+});
+
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// Marquee
+const items=['New Arrivals 2025','Luxury Fashion','Designer Perfumes','Streetwear','Premium Suits','Limited Edition','Sneakers','Watches','Le Pro Collection'];
+const inner=document.getElementById('marqueeInner');
+[...items,...items].forEach(t=>{
+  const s=document.createElement('span');
+  s.className='marquee-item';
+  s.textContent='✦ '+t;
+  inner.appendChild(s);
+});
+
+// Countdown – 12 hrs from now
+function startCountdown(){
+  const end=new Date(Date.now()+12*3600*1000);
+  setInterval(()=>{
+    const diff=end-Date.now();
+    if(diff<=0)return;
+    const h=Math.floor(diff/3600000);
+    const m=Math.floor((diff%3600000)/60000);
+    const s=Math.floor((diff%60000)/1000);
+    document.getElementById('cHours').textContent=String(h).padStart(2,'0');
+    document.getElementById('cMins').textContent=String(m).padStart(2,'0');
+    document.getElementById('cSecs').textContent=String(s).padStart(2,'0');
+  },1000);
+}
+startCountdown();
+
+// Toast
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Product card HTML
+function productCard(p){
+  const wishlisted=Store.isWishlisted(p.id);
+  const badgeClass={
+    'New Arrival':'badge-new','Trending':'badge-trending',
+    'Limited':'badge-limited','Luxury':'badge-luxury','Best Seller':'badge-bestseller'
+  }[p.badge]||'badge-new';
+  return `<div class="product-card" onclick="window.location='product.html?id=${p.id}'">
+    <div class="product-img">
+      <img src="${p.image}" alt="${p.name}" loading="lazy">
+      <span class="product-badge ${badgeClass}">${p.badge}</span>
+      <a class="product-wish ${wishlisted?'active':''}" onclick="event.stopPropagation();toggleWish('${p.id}',this)" title="Wishlist">♥</a>
+      <div class="product-actions">
+        <button class="btn btn-gold" style="flex:1;padding:8px;font-size:.8rem" onclick="event.stopPropagation();quickAdd('${p.id}')">Add to Cart</button>
+        <button class="btn btn-wa" style="padding:8px 14px;font-size:.9rem" onclick="event.stopPropagation();Store.orderOnWhatsApp(Store.getProductById('${p.id}'),null)">💬</button>
+      </div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">${p.name}</div>
+      <div class="product-cat">${p.category}</div>
+      <div class="product-price">
+        <span class="price-main">${formatPrice(p.price)}</span>
+        ${p.oldPrice?`<span class="price-old">${formatPrice(p.oldPrice)}</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleWish(id,el){
+  const p=Store.getProductById(id);
+  const added=Store.toggleWishlist(p);
+  el.classList.toggle('active',added);
+  showToast(added?`Added to wishlist!`:`Removed from wishlist`,'♥');
+}
+
+function quickAdd(id){
+  const p=Store.getProductById(id);
+  const size=p.sizes&&p.sizes[0]||'One Size';
+  Store.addToCart(p,size,1);
+  showToast(`${p.name} added to cart!`,'🛒');
+}
+
+function shopMood(mood){
+  window.location='shop.html?mood='+encodeURIComponent(mood);
+}
+
+// Render grids
+function renderNewArrivals(){
+  const products=Store.getProducts().filter(p=>p.badge==='New Arrival'||p.badge==='Best Seller').slice(0,4);
+  document.getElementById('newArrivalsGrid').innerHTML=products.map(productCard).join('');
+}
+
+function renderPerfumes(){
+  const products=Store.getProducts().filter(p=>['Perfumes','Luxury Fragrances'].includes(p.category)).slice(0,3);
+  document.getElementById('perfumeShowcase').innerHTML=products.map(p=>`
+    <div class="perfume-card" onclick="window.location='product.html?id=${p.id}'">
+      <img class="perfume-img" src="${p.image}" alt="${p.name}" loading="lazy">
+      <h3 style="font-family:'Playfair Display',serif;margin-bottom:8px">${p.name}</h3>
+      <div class="scent-tags">
+        ${p.scentFamily?`<span class="scent-tag">${p.scentFamily}</span>`:''}
+        ${p.occasion?`<span class="scent-tag">${p.occasion}</span>`:''}
+        ${p.season?`<span class="scent-tag">${p.season}</span>`:''}
+      </div>
+      <div class="price-main" style="margin:12px 0">${formatPrice(p.price)}</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-gold" style="padding:8px 20px;font-size:.8rem" onclick="event.stopPropagation();quickAdd('${p.id}')">Add to Cart</button>
+        <button class="btn btn-wa" style="padding:8px 14px" onclick="event.stopPropagation();Store.orderOnWhatsApp(p,'50ml')">💬</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTrending(){
+  const products=Store.getProducts().filter(p=>p.trending).slice(0,4);
+  document.getElementById('trendingGrid').innerHTML=products.map(productCard).join('');
+}
+
+function renderReviews(){
+  const reviews=[
+    {name:'Che Emmanuel',loc:'Buea',stars:5,text:'Best fashion shop in Buea! The suits are top-tier and the perfumes last all day. Highly recommended!',img:'https://i.pravatar.cc/100?img=11'},
+    {name:'Nkeng Brian',loc:'Douala',stars:5,text:'Ordered the Noir Absolu perfume and I have been getting compliments everywhere. Le Pro never disappoints!',img:'https://i.pravatar.cc/100?img=12'},
+    {name:'Fon Marcus',loc:'Bamenda',stars:5,text:'The leather jacket is incredible quality. WhatsApp ordering made it so easy. Delivered same day!',img:'https://i.pravatar.cc/100?img=13'},
+  ];
+  document.getElementById('reviewsGrid').innerHTML=reviews.map(r=>`
+    <div class="review-card">
+      <div class="review-stars">${'★'.repeat(r.stars)}</div>
+      <p class="review-text">"${r.text}"</p>
+      <div class="reviewer">
+        <img class="reviewer-avatar" src="${r.img}" alt="${r.name}">
+        <div><div class="reviewer-name">${r.name}</div><div class="reviewer-loc">📍 ${r.loc}</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderGallery(){
+  const imgs=[
+    'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600',
+    'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600',
+    'https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=600',
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600',
+    'https://images.unsplash.com/photo-1536243298747-ea8874136d64?w=600',
+  ];
+  document.getElementById('galleryGrid').innerHTML=imgs.map(src=>`
+    <div class="gallery-item">
+      <img src="${src}" alt="Le Pro Style" loading="lazy">
+      <div class="gallery-overlay"></div>
+    </div>
+  `).join('');
+}
+
+// Map
+function initMap(){
+  const map=L.map('storeMap').setView([4.1536,9.2358],15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+  const icon=L.divIcon({html:'<div style="background:var(--gold);color:#000;padding:8px 14px;border-radius:8px;font-weight:700;font-size:.8rem;white-space:nowrap">Le Pro Collection</div>',className:''});
+  L.marker([4.1536,9.2358],{icon}).addTo(map).bindPopup('<b>Le Pro Collection</b><br>Malingo Opposite Guinness, Buea').openPopup();
+}
+
+// Init
+renderNewArrivals();
+renderPerfumes();
+renderTrending();
+renderReviews();
+renderGallery();
+initMap();
+</script>
+</body>
+</html>

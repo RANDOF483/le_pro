@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact Us – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:120px 40px 80px;max-width:1200px;margin:0 auto}
+.contact-info{background:var(--glass);padding:40px;border-radius:var(--radius);border:1px solid var(--glass-border)}
+.contact-item{display:flex;gap:16px;margin-bottom:24px;align-items:flex-start}
+.contact-icon{font-size:1.5rem}
+@media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html" style="color:var(--gold)">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="contact-grid">
+  <div>
+    <div class="section-tag">Get In Touch</div>
+    <h1 class="section-title">Contact <span class="gold">Us</span></h1>
+    <p style="color:rgba(255,255,255,0.6);margin-bottom:40px">Have a question about a product, size, or order? We're here to help.</p>
+    
+    <div class="contact-info">
+      <div class="contact-item">
+        <div class="contact-icon">📍</div>
+        <div>
+          <h4 style="color:var(--gold);margin-bottom:4px">Store Location</h4>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem">Le Pro Collection<br>Malingo Opposite Guinness<br>Buea, Cameroon</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📱</div>
+        <div>
+          <h4 style="color:var(--gold);margin-bottom:4px">WhatsApp / Phone</h4>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem">+237 682 676 142</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🕒</div>
+        <div>
+          <h4 style="color:var(--gold);margin-bottom:4px">Opening Hours</h4>
+          <p style="color:rgba(255,255,255,0.7);font-size:.9rem">Mon - Sat: 8:00 AM - 8:00 PM<br>Sun: Closed</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:var(--black2);padding:40px;border-radius:var(--radius);border:1px solid var(--glass-border)">
+    <h3 style="margin-bottom:24px;font-family:'Playfair Display'">Send a Message</h3>
+    <div class="form-group"><input type="text" class="form-input" placeholder="Your Name"></div>
+    <div class="form-group"><input type="text" class="form-input" placeholder="Phone Number"></div>
+    <div class="form-group"><textarea class="form-input" rows="4" placeholder="How can we help you?"></textarea></div>
+    <button class="btn btn-gold" style="width:100%;padding:14px" onclick="alert('Message sent! We will contact you soon.')">Send Message</button>
+  </div>
+</div>
+</body>
+</html>

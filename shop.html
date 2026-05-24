@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shop – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.shop-hero{padding:140px 40px 60px;background:linear-gradient(135deg,#0a0a0a,#1a1000);text-align:center}
+.search-bar{max-width:600px;margin:32px auto 0;position:relative}
+.search-input{width:100%;padding:16px 60px 16px 24px;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:50px;color:var(--white);font-size:1rem;outline:none}
+.search-input:focus{border-color:var(--gold)}
+.search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--gold);border:none;border-radius:50px;padding:10px 20px;cursor:pointer;font-weight:700;color:var(--black)}
+.shop-layout{display:grid;grid-template-columns:250px 1fr;gap:32px;padding:40px;max-width:1400px;margin:0 auto}
+.sidebar{position:sticky;top:90px;height:fit-content}
+.sidebar-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.sidebar-title{font-weight:600;margin-bottom:16px;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.cat-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;cursor:pointer;color:rgba(255,255,255,0.7);font-size:.875rem;border-bottom:1px solid rgba(255,255,255,0.05);transition:color .3s}
+.cat-item:hover,.cat-item.active{color:var(--gold)}
+.cat-count{background:var(--gold-dim);color:var(--gold);padding:2px 8px;border-radius:50px;font-size:.7rem}
+.price-range{margin-top:12px}
+.price-inputs{display:flex;gap:8px;margin-top:8px}
+.price-input{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:8px;color:var(--white);font-size:.85rem;outline:none}
+.products-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:gap}
+.sort-select{background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);color:var(--white);padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;outline:none}
+#productsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.no-products{text-align:center;padding:80px 20px;color:rgba(255,255,255,0.5)}
+@media(max-width:900px){.shop-layout{grid-template-columns:1fr}.sidebar{position:static}#productsGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){#productsGrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html" style="color:var(--gold)">Shop</a></li>
+    <li><a href="perfumes.html">Perfumes</a></li>
+    <li><a href="stylist.html">AI Stylist</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <span class="close-menu" onclick="toggleMenu()">✕</span>
+  <a href="index.html" onclick="toggleMenu()">Home</a>
+  <a href="shop.html" onclick="toggleMenu()">Shop</a>
+  <a href="perfumes.html" onclick="toggleMenu()">Perfumes</a>
+  <a href="stylist.html" onclick="toggleMenu()">AI Stylist</a>
+  <a href="cart.html" onclick="toggleMenu()">🛒 Cart</a>
+</div>
+
+<div class="shop-hero">
+  <div class="section-tag">Browse Everything</div>
+  <h1 class="section-title">The <span class="gold">Collection</span></h1>
+  <p style="color:rgba(255,255,255,0.6)">Premium fashion. Luxury fragrances. All curated for the modern man.</p>
+  <div class="search-bar">
+    <input class="search-input" id="searchInput" type="text" placeholder="Search outfits, perfumes, sneakers...">
+    <button class="search-btn" onclick="applyFilters()">🔍</button>
+  </div>
+</div>
+
+<div class="filter-bar" style="padding:20px 40px;background:var(--black2);border-bottom:1px solid var(--glass-border)">
+  <button class="filter-btn active" onclick="setMood('')">All</button>
+  <button class="filter-btn" onclick="setMood('Streetwear')">🔥 Streetwear</button>
+  <button class="filter-btn" onclick="setMood('Luxury')">👑 Luxury</button>
+  <button class="filter-btn" onclick="setMood('Business')">💼 Business</button>
+  <button class="filter-btn" onclick="setMood('Smart Casual')">✨ Smart Casual</button>
+</div>
+
+<div class="shop-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Categories</div>
+      <div id="catList"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Price Range (FCFA)</div>
+      <div class="price-inputs">
+        <input class="price-input" id="priceMin" type="number" placeholder="Min" min="0">
+        <input class="price-input" id="priceMax" type="number" placeholder="Max">
+      </div>
+      <button class="btn btn-outline" style="margin-top:12px;width:100%;padding:10px" onclick="applyFilters()">Apply</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Availability</div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.875rem;color:rgba(255,255,255,0.7)">
+        <input type="checkbox" id="inStockOnly" onchange="applyFilters()" style="accent-color:var(--gold)"> In Stock Only
+      </label>
+    </div>
+  </aside>
+
+  <!-- Products -->
+  <main>
+    <div class="products-header">
+      <div id="resultsCount" style="color:rgba(255,255,255,0.5);font-size:.875rem"></div>
+      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+        <option value="default">Sort: Default</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="trending">Trending First</option>
+        <option value="new">New Arrivals First</option>
+      </select>
+    </div>
+    <div id="productsGrid"></div>
+  </main>
+</div>
+
+<a class="wa-float" href="https://wa.me/237682676142" target="_blank">💬<div class="wa-tooltip">Order on WhatsApp</div></a>
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60));
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
+
+const CATS=['All','T-Shirts','Hoodies','Jeans','Jackets','Sneakers','Watches','Suits','Caps','Bags','Accessories','Perfumes','Luxury Fragrances','Body Sprays'];
+let activeCat='',activeMood='';
+
+// Read URL params
+const params=new URLSearchParams(window.location.search);
+if(params.get('cat'))activeCat=params.get('cat');
+if(params.get('mood'))activeMood=params.get('mood');
+
+function buildCatList(){
+  const products=Store.getProducts();
+  const catCounts={};
+  products.forEach(p=>{catCounts[p.category]=(catCounts[p.category]||0)+1});
+  const list=document.getElementById('catList');
+  list.innerHTML=CATS.map(c=>`
+    <div class="cat-item ${activeCat===(c==='All'?'':c)?'active':''}" onclick="setCat('${c==='All'?'':c}')">
+      <span>${c}</span>
+      <span class="cat-count">${c==='All'?products.length:catCounts[c]||0}</span>
+    </div>
+  `).join('');
+}
+
+function setCat(cat){
+  activeCat=cat;
+  buildCatList();
+  applyFilters();
+}
+
+function setMood(mood){
+  activeMood=mood;
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.includes(mood)||(mood===''&&b.textContent.includes('All')));
+  });
+  applyFilters();
+}
+
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function toggleWish(id,el){
+  const p=Store.getProductById(id);
+  const added=Store.toggleWishlist(p);
+  el.classList.toggle('active',added);
+  showToast(added?'Added to wishlist!':'Removed from wishlist','♥');
+}
+
+function quickAdd(id){
+  const p=Store.getProductById(id);
+  Store.addToCart(p,p.sizes[0]||'One Size',1);
+  showToast(`${p.name} added to cart!`,'🛒');
+}
+
+function productCard(p){
+  const wishlisted=Store.isWishlisted(p.id);
+  const badgeClass={'New Arrival':'badge-new','Trending':'badge-trending','Limited':'badge-limited','Luxury':'badge-luxury','Best Seller':'badge-bestseller'}[p.badge]||'badge-new';
+  return `<div class="product-card" onclick="window.location='product.html?id=${p.id}'">
+    <div class="product-img">
+      <img src="${p.image}" alt="${p.name}" loading="lazy">
+      <span class="product-badge ${badgeClass}">${p.badge}</span>
+      <a class="product-wish ${wishlisted?'active':''}" onclick="event.stopPropagation();toggleWish('${p.id}',this)">♥</a>
+      <div class="product-actions">
+        <button class="btn btn-gold" style="flex:1;padding:8px;font-size:.8rem" onclick="event.stopPropagation();quickAdd('${p.id}')">Add to Cart</button>
+        <button class="btn btn-wa" style="padding:8px 14px" onclick="event.stopPropagation();Store.orderOnWhatsApp(Store.getProductById('${p.id}'),null)">💬</button>
+      </div>
+    </div>
+    <div class="product-info">
+      <div class="product-name">${p.name}</div>
+      <div class="product-cat">${p.category}</div>
+      <div class="product-price">
+        <span class="price-main">${formatPrice(p.price)}</span>
+        ${p.oldPrice?`<span class="price-old">${formatPrice(p.oldPrice)}</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function applyFilters(){
+  let products=Store.getProducts();
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  const minP=parseFloat(document.getElementById('priceMin').value)||0;
+  const maxP=parseFloat(document.getElementById('priceMax').value)||Infinity;
+  const inStock=document.getElementById('inStockOnly').checked;
+  const sort=document.getElementById('sortSelect').value;
+
+  if(activeCat)products=products.filter(p=>p.category===activeCat);
+  if(activeMood)products=products.filter(p=>p.mood===activeMood);
+  if(search)products=products.filter(p=>p.name.toLowerCase().includes(search)||p.category.toLowerCase().includes(search)||(p.description||'').toLowerCase().includes(search));
+  products=products.filter(p=>p.price>=minP&&p.price<=maxP);
+  if(inStock)products=products.filter(p=>p.stock>0);
+
+  if(sort==='price-asc')products.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-desc')products.sort((a,b)=>b.price-a.price);
+  else if(sort==='trending')products.sort((a,b)=>b.trending-a.trending);
+  else if(sort==='new')products.sort((a,b)=>b.id.localeCompare(a.id));
+
+  document.getElementById('resultsCount').textContent=`${products.length} product${products.length!==1?'s':''} found`;
+  document.getElementById('productsGrid').innerHTML=products.length
+    ?products.map(productCard).join('')
+    :`<div class="no-products" style="grid-column:1/-1"><div style="font-size:3rem">🔍</div><h3 style="margin:16px 0">No products found</h3><p>Try adjusting your filters.</p></div>`;
+}
+
+buildCatList();
+applyFilters();
+
+// Apply mood from URL
+if(activeMood){
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.includes(activeMood));
+  });
+}
+</script>
+</body>
+</html>

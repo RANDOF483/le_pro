@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Men's Stylist – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.stylist-hero{padding:140px 40px 60px;text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a0e00,#0a0a0a)}
+.stylist-form{max-width:700px;margin:0 auto;background:var(--glass);border:1px solid var(--glass-border);border-radius:24px;padding:48px;margin-bottom:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.result-section{max-width:1200px;margin:0 auto;padding:0 40px 80px}
+.result-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:32px;margin-bottom:32px}
+.result-title{color:var(--gold);font-size:.75rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px}
+.outfit-result{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.outfit-item{background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .3s}
+.outfit-item:hover{border-color:var(--gold);transform:translateY(-4px)}
+.outfit-item img{width:100%;height:160px;object-fit:cover}
+.outfit-item-info{padding:12px}
+.outfit-item-name{font-weight:600;font-size:.875rem;margin-bottom:4px}
+.outfit-item-price{color:var(--gold);font-size:.85rem}
+.size-wizard{background:var(--glass);border:1px solid var(--glass-border);border-radius:24px;padding:40px;max-width:500px;margin:60px auto;text-align:center}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}.stylist-form{padding:28px}}
+</style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="perfumes.html">Perfumes</a></li>
+    <li><a href="stylist.html" style="color:var(--gold)">AI Stylist</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+  </div>
+</nav>
+
+<div class="stylist-hero">
+  <div class="section-tag">✦ Powered by AI</div>
+  <h1 class="section-title">Your Personal <span class="gold">Fashion AI</span></h1>
+  <p style="color:rgba(255,255,255,0.6);max-width:500px;margin:0 auto">Tell us your budget, occasion, and style — we'll build the perfect look with matching fragrance.</p>
+</div>
+
+<div style="padding:0 40px">
+  <div class="stylist-form">
+    <h3 style="margin-bottom:28px;font-family:'Playfair Display',serif;font-size:1.4rem">Build My Look 👔</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Budget (FCFA)</label>
+        <input class="form-input" id="budget" type="number" placeholder="e.g. 40000" min="1000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Occasion</label>
+        <select class="form-select" id="occasion">
+          <option value="">Any Occasion</option>
+          <option>Daytime</option>
+          <option>Evening</option>
+          <option>Office</option>
+          <option>Special Occasion</option>
+          <option>Sport</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fashion Style</label>
+        <select class="form-select" id="mood">
+          <option value="">Any Style</option>
+          <option>Streetwear</option>
+          <option>Luxury</option>
+          <option>Business</option>
+          <option>Smart Casual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Scent Preference</label>
+        <select class="form-select" id="scentFamily">
+          <option value="">Any Scent</option>
+          <option>Fresh</option>
+          <option>Oud</option>
+          <option>Woody</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-gold" style="width:100%;padding:16px;font-size:1rem;margin-top:8px" onclick="runStylist()">✨ Get My Recommendation</button>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="result-section" id="resultSection" style="display:none">
+  <div style="text-align:center;margin-bottom:40px">
+    <div class="section-tag">AI Result</div>
+    <h2 class="section-title">Your Perfect <span class="gold">Look</span></h2>
+  </div>
+
+  <div class="result-card">
+    <div class="result-title">👔 Outfit Picks</div>
+    <div class="outfit-result" id="outfitResult"></div>
+  </div>
+
+  <div class="form-row" style="gap:16px">
+    <div class="result-card" id="shoesCard">
+      <div class="result-title">👟 Sneakers</div>
+      <div id="shoesResult"></div>
+    </div>
+    <div class="result-card" id="watchCard">
+      <div class="result-title">⌚ Watch</div>
+      <div id="watchResult"></div>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-title">🌹 Signature Fragrance</div>
+    <div id="perfumeResult"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+    <button class="btn btn-gold" style="padding:14px 32px" onclick="addAllToCart()">🛒 Add All to Cart</button>
+    <button class="btn btn-wa" style="padding:14px 32px" onclick="orderLookWhatsApp()">💬 Order Full Look on WhatsApp</button>
+  </div>
+</div>
+
+<!-- Size Wizard -->
+<div class="size-wizard">
+  <div class="section-tag" style="margin-bottom:16px">📏 AI Size Advisor</div>
+  <h3 style="margin-bottom:24px;font-family:'Playfair Display',serif">Find Your Perfect Fit</h3>
+  <div class="form-group">
+    <label class="form-label">Height (cm)</label>
+    <input class="form-input" id="height" type="number" placeholder="e.g. 175">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Weight (kg)</label>
+    <input class="form-input" id="weight" type="number" placeholder="e.g. 70">
+  </div>
+  <button class="btn btn-outline" style="width:100%;padding:14px;margin-top:8px" onclick="calcSize()">Get My Size</button>
+  <div id="sizeResult" style="margin-top:20px;display:none">
+    <div style="font-size:3rem" id="sizeEmoji">👕</div>
+    <h2 style="color:var(--gold);margin:8px 0" id="sizeValue">L</h2>
+    <p style="color:rgba(255,255,255,0.6);font-size:.875rem" id="sizeDesc"></p>
+  </div>
+</div>
+
+<!-- Fragrance Engine -->
+<section class="section" style="background:var(--black2)">
+  <div class="section-header">
+    <div class="section-tag">🌹 Scent Finder</div>
+    <h2 class="section-title">Fragrance <span class="gold">Recommendation Engine</span></h2>
+    <p class="section-sub">Answer a few questions and we'll find your perfect scent.</p>
+  </div>
+  <div style="max-width:800px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+      <div>
+        <label class="form-label">Scent Family</label>
+        <select class="form-select" id="fScent">
+          <option value="">Any</option>
+          <option>Fresh</option><option>Oud</option><option>Woody</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Occasion</label>
+        <select class="form-select" id="fOccasion">
+          <option value="">Any</option>
+          <option>Daytime</option><option>Evening</option><option>Office</option><option>Special Occasion</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Season</label>
+        <select class="form-select" id="fSeason">
+          <option value="">Any</option>
+          <option>Summer</option><option>Winter</option><option>Autumn</option><option>All Season</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:24px">
+      <label class="form-label">Max Budget (FCFA)</label>
+      <input class="form-input" id="fBudget" type="number" placeholder="Leave blank for any budget">
+    </div>
+    <button class="btn btn-gold" style="width:100%;padding:14px" onclick="runFragranceEngine()">Find My Scent 🌹</button>
+    <div class="grid-3" id="fragranceResults" style="margin-top:32px"></div>
+  </div>
+</section>
+
+<a class="wa-float" href="https://wa.me/237682676142" target="_blank">💬<div class="wa-tooltip">Order on WhatsApp</div></a>
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60));
+
+let currentLook={outfit:[],shoes:[],watch:[],perfume:[]};
+
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function miniCard(p){
+  return `<div class="outfit-item" onclick="window.location='product.html?id=${p.id}'">
+    <img src="${p.image}" alt="${p.name}">
+    <div class="outfit-item-info">
+      <div class="outfit-item-name">${p.name}</div>
+      <div class="outfit-item-price">${formatPrice(p.price)}</div>
+      <button class="btn btn-gold" style="margin-top:8px;padding:6px 14px;font-size:.75rem" onclick="event.stopPropagation();Store.addToCart(Store.getProductById('${p.id}'),'${p.sizes[0]}',1);showToast('Added to cart!','🛒')">Add to Cart</button>
+    </div>
+  </div>`;
+}
+
+function runStylist(){
+  const budget=parseFloat(document.getElementById('budget').value)||50000;
+  const occasion=document.getElementById('occasion').value;
+  const mood=document.getElementById('mood').value;
+  const scentFamily=document.getElementById('scentFamily').value;
+
+  const result=AIStylist.recommend({budget,occasion,mood,scentFamily});
+  currentLook=result;
+
+  document.getElementById('outfitResult').innerHTML=result.outfit.length?result.outfit.map(miniCard).join(''):`<p style="color:rgba(255,255,255,0.4)">No outfits found for this budget. Try increasing it.</p>`;
+  document.getElementById('shoesResult').innerHTML=result.shoes.length?result.shoes.map(miniCard).join(''):`<p style="color:rgba(255,255,255,0.4)">No sneakers in range.</p>`;
+  document.getElementById('watchResult').innerHTML=result.watch.length?result.watch.map(miniCard).join(''):`<p style="color:rgba(255,255,255,0.4)">No watches in range.</p>`;
+  document.getElementById('perfumeResult').innerHTML=result.perfume.length?result.perfume.map(miniCard).join(''):`<p style="color:rgba(255,255,255,0.4)">No perfumes found. Try a different scent preference.</p>`;
+
+  document.getElementById('resultSection').style.display='block';
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+}
+
+function addAllToCart(){
+  const all=[...currentLook.outfit,...currentLook.shoes,...currentLook.watch,...currentLook.perfume];
+  if(!all.length){showToast('No items to add','⚠️');return;}
+  all.forEach(p=>Store.addToCart(p,p.sizes[0]||'One Size',1));
+  showToast(`${all.length} items added to cart!`,'🛒');
+}
+
+function orderLookWhatsApp(){
+  const all=[...currentLook.outfit,...currentLook.shoes,...currentLook.watch,...currentLook.perfume];
+  if(!all.length){showToast('Run the stylist first','⚠️');return;}
+  const lines=all.map(p=>`• ${p.name} – ${formatPrice(p.price)}`).join('\n');
+  const total=all.reduce((s,p)=>s+p.price,0);
+  const msg=`👔 *Le Pro Collection – Full Look Order*\n\n${lines}\n\n💰 *Estimated Total: ${formatPrice(total)}*\n\nPlease help me get this complete look! 🙏`;
+  Store.openWhatsApp(msg);
+}
+
+function calcSize(){
+  const h=parseFloat(document.getElementById('height').value);
+  const w=parseFloat(document.getElementById('weight').value);
+  if(!h||!w){showToast('Enter height and weight','⚠️');return;}
+  const size=SizeAdvisor.recommend({height:h,weight:w});
+  const descriptions={S:'Slim / Athletic build',M:'Average / Medium build',L:'Regular / Standard build',XL:'Larger frame / Broad shoulders',XXL:'Extra large / Full build'};
+  document.getElementById('sizeValue').textContent=size;
+  document.getElementById('sizeDesc').textContent=descriptions[size]||'';
+  document.getElementById('sizeResult').style.display='block';
+}
+
+function runFragranceEngine(){
+  const scentFamily=document.getElementById('fScent').value;
+  const occasion=document.getElementById('fOccasion').value;
+  const season=document.getElementById('fSeason').value;
+  const budget=parseFloat(document.getElementById('fBudget').value)||Infinity;
+
+  const results=FragranceEngine.recommend({scentFamily,occasion,season,budget});
+  const grid=document.getElementById('fragranceResults');
+  if(!results.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.5)">No fragrances match. Try different filters.</div>`;return;
+  }
+  grid.innerHTML=results.map(p=>`
+    <div class="perfume-card" onclick="window.location='product.html?id=${p.id}'">
+      <img class="perfume-img" src="${p.image}" alt="${p.name}">
+      <h3 style="font-family:'Playfair Display',serif;margin-bottom:8px">${p.name}</h3>
+      <div class="scent-tags">
+        ${p.scentFamily?`<span class="scent-tag">${p.scentFamily}</span>`:''}
+        ${p.occasion?`<span class="scent-tag">${p.occasion}</span>`:''}
+      </div>
+      <div class="price-main" style="margin:12px 0">${formatPrice(p.price)}</div>
+      <button class="btn btn-gold" style="width:100%;padding:10px;font-size:.85rem" onclick="event.stopPropagation();Store.addToCart(Store.getProductById('${p.id}'),'50ml',1);showToast('Added!','🛒')">Add to Cart</button>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

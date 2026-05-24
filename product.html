@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.product-detail{display:grid;grid-template-columns:1fr 1fr;gap:60px;padding:120px 60px 80px;max-width:1300px;margin:0 auto}
+.img-gallery{position:sticky;top:90px;height:fit-content}
+.main-img{width:100%;border-radius:var(--radius);aspect-ratio:3/4;object-fit:cover;margin-bottom:12px;border:1px solid var(--glass-border)}
+.thumb-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.thumb{border-radius:8px;aspect-ratio:1;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:border .3s}
+.thumb.active,.thumb:hover{border-color:var(--gold)}
+.product-detail-info h1{font-size:2.2rem;margin-bottom:8px}
+.product-detail-cat{color:var(--gold);font-size:.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
+.detail-price{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.detail-price-main{font-size:2rem;font-weight:700;color:var(--gold)}
+.detail-price-old{font-size:1.2rem;color:rgba(255,255,255,0.4);text-decoration:line-through}
+.discount-pill{background:var(--gold);color:var(--black);padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:700}
+.size-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.size-btn{padding:10px 18px;border:1px solid var(--glass-border);border-radius:8px;background:transparent;color:var(--white);cursor:pointer;font-size:.875rem;transition:all .3s}
+.size-btn:hover,.size-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.size-btn:disabled{opacity:.3;cursor:not-allowed}
+.qty-selector{display:flex;align-items:center;gap:12px;margin:20px 0}
+.qty-selector button{width:36px;height:36px;border:1px solid var(--glass-border);border-radius:50%;background:transparent;color:var(--white);font-size:1.2rem;cursor:pointer;transition:all .3s}
+.qty-selector button:hover{border-color:var(--gold);color:var(--gold)}
+.action-btns{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.spec-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:.875rem}
+.spec-row:last-child{border:none}
+.spec-label{color:rgba(255,255,255,0.5)}
+.related-section{padding:60px;background:var(--black2)}
+@media(max-width:900px){.product-detail{grid-template-columns:1fr;padding:100px 20px 60px}}
+</style>
+</head>
+<body>
+<nav class="navbar scrolled" id="navbar">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="perfumes.html">Perfumes</a></li>
+    <li><a href="stylist.html">AI Stylist</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="wishlist.html" class="nav-icon">🤍<span class="badge wish-badge" style="display:none">0</span></a>
+    <a href="cart.html" class="nav-icon">🛒<span class="badge cart-badge" style="display:none">0</span></a>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <span class="close-menu" onclick="toggleMenu()">✕</span>
+  <a href="index.html" onclick="toggleMenu()">Home</a>
+  <a href="shop.html" onclick="toggleMenu()">Shop</a>
+  <a href="cart.html" onclick="toggleMenu()">🛒 Cart</a>
+</div>
+
+<div id="productDetail"></div>
+
+<section class="related-section">
+  <div class="section-header"><div class="section-tag">You Might Like</div><h2 class="section-title">Related <span class="gold">Products</span></h2></div>
+  <div class="grid-4" id="relatedGrid"></div>
+</section>
+
+<a class="wa-float" href="https://wa.me/237682676142" target="_blank">💬<div class="wa-tooltip">Order on WhatsApp</div></a>
+<div class="toast" id="toast"><span class="toast-icon">✅</span><span class="toast-msg" id="toastMsg"></span></div>
+
+<script src="js/store.js"></script>
+<script>
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
+
+let selectedSize='',selectedQty=1;
+
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function setSize(size,btn){
+  selectedSize=size;
+  document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function changeQty(delta){
+  selectedQty=Math.max(1,selectedQty+delta);
+  document.getElementById('qtyNum').textContent=selectedQty;
+}
+
+function addToCart(product){
+  if(product.sizes&&product.sizes[0]!=='One Size'&&!selectedSize){showToast('Please select a size','⚠️');return;}
+  const size=selectedSize||product.sizes[0]||'One Size';
+  Store.addToCart(product,size,selectedQty);
+  showToast(`${product.name} added to cart!`,'🛒');
+}
+
+function toggleWish(product){
+  const added=Store.toggleWishlist(product);
+  document.getElementById('wishBtn').textContent=added?'❤️ Remove from Wishlist':'🤍 Add to Wishlist';
+  showToast(added?'Added to wishlist!':'Removed','♥');
+}
+
+function renderProduct(p){
+  if(!p){document.getElementById('productDetail').innerHTML='<div style="padding:200px 40px;text-align:center"><h2>Product not found</h2><a href="shop.html" class="btn btn-gold" style="margin-top:20px">Back to Shop</a></div>';return;}
+  selectedSize=p.sizes&&p.sizes[0]||'';
+  const discount=p.oldPrice?Math.round((1-p.price/p.oldPrice)*100):0;
+  const isPerfume=['Perfumes','Luxury Fragrances','Body Sprays'].includes(p.category);
+  document.getElementById('productDetail').innerHTML=`
+    <div class="product-detail">
+      <div class="img-gallery">
+        <img class="main-img" id="mainImg" src="${p.image}" alt="${p.name}">
+        <div class="thumb-row">
+          <img class="thumb active" src="${p.image}" onclick="swapImg(this,'${p.image}')">
+          <img class="thumb" src="${p.image}" onclick="swapImg(this,'${p.image}')">
+        </div>
+      </div>
+      <div class="product-detail-info">
+        <div class="product-detail-cat">${p.category}</div>
+        <h1>${p.name}</h1>
+        <div style="color:var(--gold);margin-bottom:16px">★★★★★ <span style="color:rgba(255,255,255,0.5);font-size:.85rem">(24 reviews)</span></div>
+        <div class="detail-price">
+          <span class="detail-price-main">${formatPrice(p.price)}</span>
+          ${p.oldPrice?`<span class="detail-price-old">${formatPrice(p.oldPrice)}</span><span class="discount-pill">-${discount}%</span>`:''}
+        </div>
+        <p style="color:rgba(255,255,255,0.7);line-height:1.8;margin-bottom:24px">${p.description||''}</p>
+
+        ${isPerfume&&p.scentFamily?`
+        <div class="scent-tags" style="justify-content:flex-start;margin-bottom:20px">
+          ${p.scentFamily?`<span class="scent-tag">${p.scentFamily}</span>`:''}
+          ${p.occasion?`<span class="scent-tag">${p.occasion}</span>`:''}
+          ${p.season?`<span class="scent-tag">${p.season}</span>`:''}
+        </div>`:''}
+
+        <div style="font-size:.8rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:10px">
+          ${isPerfume?'Volume':'Size'}
+        </div>
+        <div class="size-grid">
+          ${p.sizes.map((s,i)=>`<button class="size-btn ${i===0?'active':''}" onclick="setSize('${s}',this)">${s}</button>`).join('')}
+        </div>
+
+        <div class="qty-selector">
+          <button onclick="changeQty(-1)">−</button>
+          <span id="qtyNum" style="font-weight:700;font-size:1.1rem">1</span>
+          <button onclick="changeQty(1)">+</button>
+          <span style="color:rgba(255,255,255,0.4);font-size:.8rem;margin-left:8px">${p.stock} in stock</span>
+        </div>
+
+        <div class="action-btns">
+          <button class="btn btn-gold" style="width:100%;padding:16px;font-size:1rem" onclick="addToCart(Store.getProductById('${p.id}'))">🛒 Add to Cart</button>
+          <button class="btn btn-wa" style="width:100%;padding:16px;font-size:1rem" onclick="Store.orderOnWhatsApp(Store.getProductById('${p.id}'),selectedSize||p.sizes[0])">💬 Order on WhatsApp</button>
+          <button class="btn btn-outline" id="wishBtn" style="width:100%;padding:14px" onclick="toggleWish(Store.getProductById('${p.id}'))">
+            ${Store.isWishlisted(p.id)?'❤️ Remove from Wishlist':'🤍 Add to Wishlist'}
+          </button>
+        </div>
+
+        <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin-top:32px">
+          <div class="spec-row"><span class="spec-label">Category</span><span>${p.category}</span></div>
+          <div class="spec-row"><span class="spec-label">Availability</span><span style="color:${p.stock>0?'#38A169':'#E53E3E'}">${p.stock>0?'In Stock':'Out of Stock'}</span></div>
+          ${isPerfume?`<div class="spec-row"><span class="spec-label">Scent Family</span><span>${p.scentFamily||'—'}</span></div>`:''}
+          <div class="spec-row"><span class="spec-label">Payment</span><span>MTN MoMo · Orange · Cash</span></div>
+          <div class="spec-row"><span class="spec-label">MoMo Number</span><span class="gold">682 676 142</span></div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">
+          <div class="glass" style="flex:1;padding:16px;text-align:center;border-radius:12px"><div style="font-size:1.5rem">🚚</div><div style="font-size:.75rem;margin-top:4px">Fast Delivery</div></div>
+          <div class="glass" style="flex:1;padding:16px;text-align:center;border-radius:12px"><div style="font-size:1.5rem">✅</div><div style="font-size:.75rem;margin-top:4px">Guaranteed Quality</div></div>
+          <div class="glass" style="flex:1;padding:16px;text-align:center;border-radius:12px"><div style="font-size:1.5rem">💬</div><div style="font-size:.75rem;margin-top:4px">WhatsApp Support</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function swapImg(thumb,src){
+  document.getElementById('mainImg').src=src;
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+
+function renderRelated(product){
+  if(!product)return;
+  const related=Store.getProducts().filter(p=>p.category===product.category&&p.id!==product.id).slice(0,4);
+  document.getElementById('relatedGrid').innerHTML=related.map(p=>`
+    <div class="product-card" onclick="window.location='product.html?id=${p.id}'">
+      <div class="product-img"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-price"><span class="price-main">${formatPrice(p.price)}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+const pid=new URLSearchParams(window.location.search).get('id');
+const product=Store.getProductById(pid);
+renderProduct(product);
+renderRelated(product);
+if(product)document.title=`${product.name} – Le Pro Collection`;
+</script>
+</body>
+</html>

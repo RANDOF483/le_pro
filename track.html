@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Tracking – Le Pro Collection</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.track-hero{padding:140px 40px 60px;text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a1000)}
+.track-container{max-width:600px;margin:0 auto;padding:40px;background:var(--glass);border:1px solid var(--glass-border);border-radius:24px;margin-bottom:80px}
+.timeline{margin-top:40px;position:relative;padding-left:30px}
+.timeline::before{content:'';position:absolute;left:8px;top:10px;bottom:10px;width:2px;background:var(--glass-border)}
+.timeline-item{position:relative;margin-bottom:30px}
+.timeline-item::before{content:'';position:absolute;left:-28px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--black2);border:2px solid var(--glass-border);z-index:2}
+.timeline-item.active::before{background:var(--gold);border-color:var(--gold);box-shadow:0 0 10px rgba(229,62,62,0.5)}
+.timeline-item.done::before{background:var(--gold);border-color:var(--gold)}
+.timeline-item.done ~ .timeline-item::before{background:var(--black2)}
+.timeline-title{font-weight:600;margin-bottom:4px;color:rgba(255,255,255,0.5)}
+.timeline-item.active .timeline-title,.timeline-item.done .timeline-title{color:var(--gold)}
+.timeline-desc{font-size:.85rem;color:rgba(255,255,255,0.5)}
+</style>
+</head>
+<body>
+<nav class="navbar scrolled">
+  <a href="index.html" class="nav-logo">Le <span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="shop.html">Shop</a></li>
+    <li><a href="dashboard.html">My Account</a></li>
+  </ul>
+</nav>
+
+<div class="track-hero">
+  <div class="section-tag">Where is my order?</div>
+  <h1 class="section-title">Track <span class="gold">Order</span></h1>
+</div>
+
+<div style="padding:0 40px">
+  <div class="track-container">
+    <div style="display:flex;gap:12px;margin-bottom:32px">
+      <input type="text" id="orderId" class="form-input" placeholder="Enter Order ID (e.g., ORD123456789)">
+      <button class="btn btn-gold" onclick="trackOrder()">Track</button>
+    </div>
+    
+    <div id="trackResult" style="display:none">
+      <h3 style="border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:16px;margin-bottom:24px">Order Status: <span id="statusBadge" class="status-badge" style="font-size:.9rem;margin-left:8px"></span></h3>
+      
+      <div class="timeline" id="timeline">
+        <div class="timeline-item" id="step1">
+          <div class="timeline-title">Order Placed (Pending)</div>
+          <div class="timeline-desc">We have received your order request.</div>
+        </div>
+        <div class="timeline-item" id="step2">
+          <div class="timeline-title">Order Confirmed</div>
+          <div class="timeline-desc">Payment verified and order is being prepared.</div>
+        </div>
+        <div class="timeline-item" id="step3">
+          <div class="timeline-title">Shipped</div>
+          <div class="timeline-desc">Your order is on the way to your address.</div>
+        </div>
+        <div class="timeline-item" id="step4">
+          <div class="timeline-title">Delivered</div>
+          <div class="timeline-desc">Enjoy your premium Le Pro Collection items!</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:40px;text-align:center">
+        <p style="font-size:.85rem;color:rgba(255,255,255,0.5);margin-bottom:12px">Need help with your order?</p>
+        <button class="btn btn-wa" style="padding:10px 24px" onclick="supportWhatsApp()">💬 Contact Support</button>
+      </div>
+    </div>
+    <div id="errorMsg" style="display:none;color:#E53E3E;text-align:center;padding:20px 0">Order not found. Please check your Order ID.</div>
+  </div>
+</div>
+
+<script src="js/store.js"></script>
+<script>
+let currentOrderId='';
+function trackOrder(){
+  const id=document.getElementById('orderId').value.trim();
+  if(!id)return;
+  const orders=Store.getOrders();
+  const order=orders.find(o=>o.id===id);
+  
+  if(order){
+    currentOrderId=id;
+    document.getElementById('errorMsg').style.display='none';
+    document.getElementById('trackResult').style.display='block';
+    
+    const badge=document.getElementById('statusBadge');
+    badge.textContent=order.status;
+    badge.className=`status-badge status-${order.status}`;
+    
+    const steps=['Pending','Confirmed','Shipped','Delivered'];
+    const idx=steps.indexOf(order.status);
+    
+    for(let i=1;i<=4;i++){
+      const el=document.getElementById('step'+i);
+      el.className='timeline-item';
+      if(i-1<idx) el.classList.add('done');
+      if(i-1===idx) el.classList.add('active');
+    }
+  }else{
+    document.getElementById('trackResult').style.display='none';
+    document.getElementById('errorMsg').style.display='block';
+  }
+}
+
+function supportWhatsApp(){
+  Store.openWhatsApp(`Hello Le Pro Collection, I need help with my order ID: ${currentOrderId}`);
+}
+</script>
+</body>
+</html>
