@@ -173,6 +173,33 @@ const Store = {
     this.openWhatsApp(msg);
   },
 
+  // Image Upload (Supabase Storage)
+  async uploadImage(file) {
+    if (!isSupabaseActive) {
+      alert("Cloud database not connected. Image upload disabled.");
+      return null;
+    }
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `public/${fileName}`;
+
+    const { data, error } = await supabaseClient.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image. Did you create the public product-images bucket?');
+      throw error;
+    }
+
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  },
+
   // Products CRUD (Cloud connected)
   async addProduct(product) {
     product.id = 'p' + Date.now();

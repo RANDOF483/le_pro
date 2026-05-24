@@ -157,8 +157,10 @@ body{background:var(--black2)}
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Image URL</label>
-      <input type="text" class="form-input" id="pImage" placeholder="https://..." required>
+      <label class="form-label">Product Image (Take Photo or Upload)</label>
+      <input type="file" class="form-input" id="pImageFile" accept="image/*" capture="environment">
+      <input type="hidden" id="pImage">
+      <div id="pImgPreview" style="margin-top:10px;font-size:0.8rem;color:var(--gold);"></div>
     </div>
     <div class="form-group">
       <label class="form-label">Sizes (comma separated)</label>
@@ -183,7 +185,7 @@ body{background:var(--black2)}
       </div>
     </div>
     
-    <button class="btn btn-gold" style="width:100%;margin-top:24px;padding:14px" onclick="saveProduct()">Save Product</button>
+    <button class="btn btn-gold" id="saveBtn" style="width:100%;margin-top:24px;padding:14px" onclick="saveProduct()">Save Product</button>
   </div>
 </div>
 
@@ -282,12 +284,27 @@ function openProductModal(){
   document.getElementById('pId').value='';
   document.querySelectorAll('.form-input, .form-select').forEach(el=>el.value='');
   document.getElementById('pSizes').value='One Size';
+  document.getElementById('pImageFile').value='';
+  document.getElementById('pImgPreview').textContent='';
   document.getElementById('productModal').classList.add('open');
 }
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
-function saveProduct(){
+async function saveProduct(){
   const id=document.getElementById('pId').value;
+  const fileInput=document.getElementById('pImageFile');
+  let imageUrl=document.getElementById('pImage').value;
+
+  if(fileInput.files.length > 0) {
+    document.getElementById('saveBtn').textContent='Uploading Image...';
+    try {
+      imageUrl = await Store.uploadImage(fileInput.files[0]);
+    } catch(e) {
+      document.getElementById('saveBtn').textContent='Save Product';
+      return;
+    }
+  }
+
   const p={
     name:document.getElementById('pName').value,
     category:document.getElementById('pCat').value,
@@ -295,7 +312,7 @@ function saveProduct(){
     oldPrice:parseFloat(document.getElementById('pOldPrice').value)||null,
     stock:parseInt(document.getElementById('pStock').value),
     badge:document.getElementById('pBadge').value,
-    image:document.getElementById('pImage').value,
+    image:imageUrl,
     sizes:document.getElementById('pSizes').value.split(',').map(s=>s.trim()),
     description:document.getElementById('pDesc').value,
     scentFamily:document.getElementById('pScent').value||null,
@@ -303,11 +320,13 @@ function saveProduct(){
     trending:Math.random()>0.5
   };
   
-  if(!p.name||!p.price||!p.image){showToast('Please fill required fields','⚠️');return;}
+  if(!p.name||!p.price||!p.image){showToast('Please fill required fields (including image)','⚠️');document.getElementById('saveBtn').textContent='Save Product';return;}
   
-  if(id){Store.updateProduct(id,p);showToast('Product updated');}
-  else {Store.addProduct(p);showToast('Product added');}
+  document.getElementById('saveBtn').textContent='Saving to Cloud...';
+  if(id){await Store.updateProduct(id,p);showToast('Product updated');}
+  else {await Store.addProduct(p);showToast('Product added');}
   
+  document.getElementById('saveBtn').textContent='Save Product';
   closeModal('productModal');
   loadData();
 }
@@ -324,6 +343,8 @@ function editProduct(id){
   document.getElementById('pStock').value=p.stock;
   document.getElementById('pBadge').value=p.badge||'';
   document.getElementById('pImage').value=p.image;
+  document.getElementById('pImageFile').value='';
+  document.getElementById('pImgPreview').textContent='Current image is saved. Upload a new one to replace.';
   document.getElementById('pSizes').value=(p.sizes||[]).join(', ');
   document.getElementById('pDesc').value=p.description||'';
   document.getElementById('pScent').value=p.scentFamily||'';
