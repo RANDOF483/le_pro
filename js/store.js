@@ -10,7 +10,7 @@ const MOMO_NUMBER = '682676142';
 // ── Supabase Configuration ────────────────────────────────
 // IMPORTANT: Replace these dummy values with your actual Supabase config!
 const SUPABASE_URL = "https://lauxyocrzpdgvjwiljvb.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_LpSUujiHr9sZ6dtmiRu2NA_HHaVfE9_.";
+const SUPABASE_ANON_KEY = "sb_publishable_LpSUujiHr9sZ6dtmiRu2NA_HHaVfE9_";
 
 let supabaseClient = null;
 let CACHED_PRODUCTS = [];
