@@ -33,12 +33,16 @@ body{background:var(--black2)}
 
 <div class="admin-login" id="loginForm">
   <div style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:24px">Admin <span class="gold">Login</span></div>
+  <div class="form-group" style="text-align:left; margin-bottom: 16px;">
+    <label class="form-label">Email</label>
+    <input type="email" id="adminEmail" class="form-input" placeholder="admin@lepro.com">
+  </div>
   <div class="form-group" style="text-align:left">
     <label class="form-label">Password</label>
     <input type="password" id="adminPass" class="form-input" placeholder="Enter admin password">
   </div>
-  <button class="btn btn-gold" style="width:100%;padding:12px" onclick="login()">Login</button>
-  <div id="loginError" style="color:#E53E3E;margin-top:12px;font-size:.875rem;display:none">Invalid password</div>
+  <button class="btn btn-gold" id="loginBtn" style="width:100%;padding:12px;margin-top:16px;" onclick="login()">Login</button>
+  <div id="loginError" style="color:#E53E3E;margin-top:12px;font-size:.875rem;display:none">Invalid email or password</div>
 </div>
 
 <div id="adminApp">
@@ -201,24 +205,38 @@ function showToast(msg,icon='✅'){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// Auth
-if(Store.isAdminLoggedIn()){
-  document.getElementById('loginForm').style.display='none';
-  document.getElementById('adminApp').style.display='block';
-  loadData();
-}
-
-function login(){
-  const pass=document.getElementById('adminPass').value;
-  if(Store.adminLogin(pass)){
+async function checkAuth() {
+  if(await Store.isAdminLoggedIn()){
     document.getElementById('loginForm').style.display='none';
     document.getElementById('adminApp').style.display='block';
     loadData();
-  }else{
-    document.getElementById('loginError').style.display='block';
   }
 }
-function logout(){Store.adminLogout();location.reload();}
+checkAuth();
+
+async function login(){
+  const email=document.getElementById('adminEmail').value;
+  const pass=document.getElementById('adminPass').value;
+  document.getElementById('loginBtn').textContent = 'Logging in...';
+  document.getElementById('loginError').style.display='none';
+  
+  try {
+    const success = await Store.adminLogin(email, pass);
+    if(success){
+      document.getElementById('loginForm').style.display='none';
+      document.getElementById('adminApp').style.display='block';
+      loadData();
+    }else{
+      document.getElementById('loginError').textContent = 'Invalid credentials';
+      document.getElementById('loginError').style.display='block';
+    }
+  } catch(e) {
+    document.getElementById('loginError').textContent = e.message;
+    document.getElementById('loginError').style.display='block';
+  }
+  document.getElementById('loginBtn').textContent = 'Login';
+}
+async function logout(){await Store.adminLogout();location.reload();}
 
 function switchTab(tabId,el){
   document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');

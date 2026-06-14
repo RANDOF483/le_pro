@@ -5,7 +5,7 @@
 
 const WHATSAPP_NUMBER = '237682676142';
 const MOMO_NUMBER = '682676142';
-const ADMIN_PASSWORD = 'leprocollection2024';
+// Admin password removed for security - using Supabase Auth
 
 // ── Supabase Configuration ────────────────────────────────
 // IMPORTANT: Replace these dummy values with your actual Supabase config!
@@ -127,12 +127,27 @@ const Store = {
     triggerUIUpdate();
   },
 
-  isAdminLoggedIn() { return sessionStorage.getItem('lp_admin') === 'true'; },
-  adminLogin(password) {
-    if (password === ADMIN_PASSWORD) { sessionStorage.setItem('lp_admin', 'true'); return true; }
-    return false;
+  async isAdminLoggedIn() { 
+    if(!isSupabaseActive) return sessionStorage.getItem('lp_admin') === 'true';
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    return !!session;
   },
-  adminLogout() { sessionStorage.removeItem('lp_admin'); },
+  async adminLogin(email, password) {
+    if(!isSupabaseActive) {
+      if (password === 'leprocollection2024') { sessionStorage.setItem('lp_admin', 'true'); return true; }
+      return false;
+    }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+    if (error) throw error;
+    return true;
+  },
+  async adminLogout() { 
+    if(!isSupabaseActive) sessionStorage.removeItem('lp_admin'); 
+    else await supabaseClient.auth.signOut();
+  },
 
   // Cart helpers
   addToCart(product, size, qty = 1) {
