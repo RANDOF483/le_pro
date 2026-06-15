@@ -96,6 +96,8 @@ async function fetchInitialData() {
     localStorage.setItem('lp_orders', JSON.stringify(CACHED_ORDERS));
   }
 
+  await Store.cleanOldProducts();
+
   triggerUIUpdate();
 }
 
@@ -218,6 +220,7 @@ const Store = {
   // Products CRUD (Cloud connected)
   async addProduct(product) {
     product.id = 'p' + Date.now();
+    product.createdAt = Date.now(); // Track creation time for auto-deletion
     if(isSupabaseActive) {
       await supabaseClient.from('products').insert([{ id: product.id, data: product }]);
       CACHED_PRODUCTS.unshift(product);
@@ -245,6 +248,16 @@ const Store = {
     CACHED_PRODUCTS = CACHED_PRODUCTS.filter(p => p.id !== id);
     this.saveProducts(CACHED_PRODUCTS);
   },
+  
+  async cleanOldProducts() {
+    const twoWeeksAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
+    const productsToDelete = CACHED_PRODUCTS.filter(p => p.createdAt && p.createdAt < twoWeeksAgo);
+    
+    for (const p of productsToDelete) {
+      await this.deleteProduct(p.id);
+    }
+  },
+
   getProductById(id) { return this.getProducts().find(p => p.id === id); },
 
   // Orders (Cloud connected)
@@ -323,6 +336,12 @@ const SizeAdvisor = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => { updateNavBadges(); });
+document.addEventListener('DOMContentLoaded', () => { 
+  updateNavBadges(); 
+  if (!isSupabaseActive) {
+    // If Supabase is not active, run clean up here
+    Store.cleanOldProducts();
+  }
+});
 document.addEventListener('cartUpdated', updateNavBadges);
 document.addEventListener('wishlistUpdated', updateNavBadges);
